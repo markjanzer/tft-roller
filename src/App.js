@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Select from "react-select";
+import RollCalculator from "./RollCalculator.js";
 
 class App extends Component {
   constructor(props) {
@@ -8,6 +9,8 @@ class App extends Component {
     this.champions = [{name:"Darius",cost:1},{name:"Elise",cost:1},{name:"Fiora",cost:1},{name:"Garen",cost:1},{name:"Graves",cost:1},{name:"Kassadin",cost:1},{name:"Khazix",cost:1},{name:"Mordekaiser",cost:1},{name:"Nidalee",cost:1},{name:"Tristana",cost:1},{name:"Vayne",cost:1},{name:"Warwick",cost:1},{name:"Ahri",cost:2},{name:"Blitzcrank",cost:2},{name:"Braum",cost:2},{name:"Lissandra",cost:2},{name:"Lucian",cost:2},{name:"Lulu",cost:2},{name:"Pyke",cost:2},{name:"RekSai",cost:2},{name:"Shen",cost:2},{name:"TwistedFate",cost:2},{name:"Varus",cost:2},{name:"Zed",cost:2},{name:"Aatrox",cost:3},{name:"Ashe",cost:3},{name:"Evelynn",cost:3},{name:"Gangplank",cost:3},{name:"Katarina",cost:3},{name:"Kennen",cost:3},{name:"Morgana",cost:3},{name:"Poppy",cost:3},{name:"Rengar",cost:3},{name:"Shyvana",cost:3},{name:"Veigar",cost:3},{name:"Volibear",cost:3},{name:"Akali",cost:4},{name:"AurelionSol",cost:4},{name:"Brand",cost:4},{name:"Chogath",cost:4},{name:"Draven",cost:4},{name:"Gnar",cost:4},{name:"Kindred",cost:4},{name:"Leona",cost:4},{name:"Sejuani",cost:4},{name:"Anivia",cost:5},{name:"Karthus",cost:5},{name:"Kayle",cost:5},{name:"MissFortune",cost:5},{name:"Swain",cost:5},{name:"Yasuo",cost:5}];
     this.championOptions = this.champions.map(champ => { return { value: champ.name, label: champ.name }})
 
+    this.renderChancesForNextRoll = this.renderChancesForNextRoll.bind(this);
+
     this.state = {
       level: 5,
       champion: this.champions[0],
@@ -15,6 +18,7 @@ class App extends Component {
     }
   }
 
+  // This logic can probably go into another file
   chanceOfCorrectCost(level, cost) {
     var levels = { 
       1: { 
@@ -110,7 +114,12 @@ class App extends Component {
   }
 
   chanceOfFindingChampion(cost, level, numberInPlay) {
-    return this.chanceOfCorrectCost(level, cost) * this.chanceOfCorrectChampion(cost) * this.percentageOfChampionRemaining(cost, numberInPlay);
+    const result = this.chanceOfCorrectCost(level, cost) * this.chanceOfCorrectChampion(cost) * this.percentageOfChampionRemaining(cost, numberInPlay);
+    if (result > 0) {
+      return result;
+    } else {
+      return 0;
+    }
   }
 
   chanceOfFindingChampionInRoll(cost, level, numberInPlay) {
@@ -121,17 +130,6 @@ class App extends Component {
     var chance5 = (1 - chance4) * this.chanceOfFindingChampion(cost, level, numberInPlay);
 
     return chance1 + chance2 + chance3 + chance4 + chance5;
-  }
-
-  numberOfRollsToHitConfidence(cost, level, numberInPlay, desiredConfidence) {
-    const chanceOfSuccessfulRoll = this.chanceOfFindingChampionInRoll(cost, level, numberInPlay);
-    let rollCount = 0;
-    let chanceOfSuccess = 0;
-    while ((chanceOfSuccess < desiredConfidence) && (rollCount < 100)) {
-      rollCount += 1;
-      chanceOfSuccess = chanceOfSuccess + ((1 - chanceOfSuccess) * chanceOfSuccessfulRoll);
-    }
-    return rollCount;
   }
 
   renderChancesForNextRoll() {
@@ -153,12 +151,6 @@ class App extends Component {
         </div>
       )
     }
-  }
-
-  renderChancesForMultipleRolls() {
-    return (
-      <div>50% chance to hit {this.state.champion.name} if you roll {this.numberOfRollsToHitConfidence(this.state.champion.cost, this.state.level, this.state.numberInPlay, 0.5)} times.</div>
-    );
   }
 
 
@@ -201,7 +193,22 @@ class App extends Component {
         </div>
 
         {this.renderChancesForNextRoll()}
-        {this.renderChancesForMultipleRolls()}
+
+        <RollCalculator
+          chance={this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay)}
+          level={false}
+          roughConfidence={0.50}
+          championName={this.state.champion.name}
+        />
+        {this.state.level === 9 ? 
+          "" :
+          <RollCalculator
+            chance={this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level + 1, this.state.numberInPlay)}
+            level={true}
+            roughConfidence={0.50}
+            championName={this.state.champion.name}
+          />
+        }
       </div>
     );
   }
