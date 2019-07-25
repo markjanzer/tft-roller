@@ -53,11 +53,11 @@ class RollCalculator extends Component {
       <div>
         <input
           type="number"
-          value={this.state.confidence}
+          value={this.state.confidence * 100}
           min="0"
           max="99"
           onChange={(e) => {
-            let confidence = e.target.value;
+            let confidence = e.target.value / 100;
             let rollCount = this.rollsFromConfidence(confidence);
             this.setState({ confidence, rollCount })
           }}
