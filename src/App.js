@@ -5,19 +5,14 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    this.champions = [{name:"Aatrox",cost:3},{name:"Ahri",cost:2},{name:"Akali",cost:4},{name:"Anivia",cost:5},{name:"Ashe",cost:3},{name:"AurelionSol",cost:4},{name:"Blitzcrank",cost:2},{name:"Brand",cost:4},{name:"Braum",cost:2},{name:"Chogath",cost:4},{name:"Darius",cost:1},{name:"Draven",cost:4},{name:"Elise",cost:1},{name:"Evelynn",cost:3},{name:"Fiora",cost:1},{name:"Gangplank",cost:3},{name:"Garen",cost:1},{name:"Gnar",cost:4},{name:"Graves",cost:1},{name:"Karthus",cost:5},{name:"Kassadin",cost:1},{name:"Katarina",cost:3},{name:"Kayle",cost:5},{name:"Kennen",cost:3},{name:"Khazix",cost:1},{name:"Kindred",cost:4},{name:"Leona",cost:4},{name:"Lissandra",cost:2},{name:"Lucian",cost:2},{name:"Lulu",cost:2},{name:"MissFortune",cost:5},{name:"Mordekaiser",cost:1},{name:"Morgana",cost:3},{name:"Nidalee",cost:1},{name:"Poppy",cost:3},{name:"Pyke",cost:2},{name:"RekSai",cost:2},{name:"Rengar",cost:3},{name:"Sejuani",cost:4},{name:"Shen",cost:2},{name:"Shyvana",cost:3},{name:"Swain",cost:5},{name:"Tristana",cost:1},{name:"TwistedFate",cost:2},{name:"Varus",cost:2},{name:"Vayne",cost:1},{name:"Veigar",cost:3},{name:"Volibear",cost:3},{name:"Warwick",cost:1},{name:"Yasuo",cost:5},{name:"Zed",cost:2}];
+    this.champions = [{name:"Darius",cost:1},{name:"Elise",cost:1},{name:"Fiora",cost:1},{name:"Garen",cost:1},{name:"Graves",cost:1},{name:"Kassadin",cost:1},{name:"Khazix",cost:1},{name:"Mordekaiser",cost:1},{name:"Nidalee",cost:1},{name:"Tristana",cost:1},{name:"Vayne",cost:1},{name:"Warwick",cost:1},{name:"Ahri",cost:2},{name:"Blitzcrank",cost:2},{name:"Braum",cost:2},{name:"Lissandra",cost:2},{name:"Lucian",cost:2},{name:"Lulu",cost:2},{name:"Pyke",cost:2},{name:"RekSai",cost:2},{name:"Shen",cost:2},{name:"TwistedFate",cost:2},{name:"Varus",cost:2},{name:"Zed",cost:2},{name:"Aatrox",cost:3},{name:"Ashe",cost:3},{name:"Evelynn",cost:3},{name:"Gangplank",cost:3},{name:"Katarina",cost:3},{name:"Kennen",cost:3},{name:"Morgana",cost:3},{name:"Poppy",cost:3},{name:"Rengar",cost:3},{name:"Shyvana",cost:3},{name:"Veigar",cost:3},{name:"Volibear",cost:3},{name:"Akali",cost:4},{name:"AurelionSol",cost:4},{name:"Brand",cost:4},{name:"Chogath",cost:4},{name:"Draven",cost:4},{name:"Gnar",cost:4},{name:"Kindred",cost:4},{name:"Leona",cost:4},{name:"Sejuani",cost:4},{name:"Anivia",cost:5},{name:"Karthus",cost:5},{name:"Kayle",cost:5},{name:"MissFortune",cost:5},{name:"Swain",cost:5},{name:"Yasuo",cost:5}];
     this.championOptions = this.champions.map(champ => { return { value: champ.name, label: champ.name }})
 
     this.state = {
-      level: 6,
-      championName: this.championOptions[0].value,
+      level: 5,
+      champion: this.champions[0],
       numberInPlay: 0,
     }
-  }
-
-  championCost() {
-    var champion = this.champions.find(c => c.name === this.state.championName);
-    return champion.cost;
   }
 
   chanceOfCorrectCost(level, cost) {
@@ -144,17 +139,17 @@ class App extends Component {
       return (
         <div>
           <div>
-            {(this.chanceOfFindingChampionInRoll(this.championCost(), this.state.level, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.championName} next roll.
+            {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll.
           </div>
           <div>
-            {(this.chanceOfFindingChampionInRoll(this.championCost(), this.state.level + 1, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.championName} next roll if you level.
+            {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level + 1, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll if you level.
           </div>
         </div>
       )
     } else {
       return (
         <div>
-          {(this.chanceOfFindingChampionInRoll(this.championCost(), this.state.level, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.championName} next roll.
+          {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll.
         </div>
       )
     }
@@ -162,7 +157,7 @@ class App extends Component {
 
   renderChancesForMultipleRolls() {
     return (
-      <div>50% chance to hit {this.state.championName} if you roll {this.numberOfRollsToHitConfidence(this.championCost(), this.state.level, this.state.numberInPlay, 0.5)} times.</div>
+      <div>50% chance to hit {this.state.champion.name} if you roll {this.numberOfRollsToHitConfidence(this.state.champion.cost, this.state.level, this.state.numberInPlay, 0.5)} times.</div>
     );
   }
 
@@ -186,7 +181,11 @@ class App extends Component {
           <Select
             defaultValue={this.championOptions[0]}
             options={this.championOptions}
-            onChange={(option) => this.setState({championName: option.value})}
+            onChange={(option) => {
+              let championName = option.value;
+              let champion = this.champions.find(champ => champ.name === championName);
+              this.setState({ champion: champion });
+            }}
           />
         </div>
 
