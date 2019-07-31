@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Select from "react-select";
-import RollCalculator from "./RollCalculator.js";
+import MultipleRollCalculator from "./MultipleRollCalculator.js";
 
 class App extends Component {
   constructor(props) {
@@ -133,26 +133,61 @@ class App extends Component {
   }
 
   renderChancesForNextRoll() {
-    if (this.state.level < 9) {
-      return (
-        <div>
+    if (this.state.level) {
+      if (this.state.level < 9) {
+        return (
+          <div>
+            <div>
+              {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll.
+            </div>
+            <div>
+              {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level + 1, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll if you level.
+            </div>
+          </div>
+        )
+      } else {
+        return (
           <div>
             {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll.
           </div>
-          <div>
-            {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level + 1, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll if you level.
-          </div>
-        </div>
-      )
-    } else {
-      return (
-        <div>
-          {(this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay) * 100).toFixed(2)}% chance of finding {this.state.champion.name} next roll.
-        </div>
-      )
+        )
+      }
     }
   }
 
+  renderMultipleRollCalculators() {
+    if (this.state.level) {
+      if (this.state.level === 9) {
+        return (
+          <div>
+            <MultipleRollCalculator
+              chance={this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay)}
+              level={false}
+              roughConfidence={0.50}
+              championName={this.state.champion.name}
+            />
+          </div>
+        )
+      } else {
+        return (
+          <div>
+            <MultipleRollCalculator
+              chance={this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay)}
+              level={false}
+              roughConfidence={0.50}
+              championName={this.state.champion.name}
+            />
+            <MultipleRollCalculator
+              chance={this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level + 1, this.state.numberInPlay)}
+              level={true}
+              roughConfidence={0.50}
+              championName={this.state.champion.name}
+            />
+          </div>
+        )
+      }
+    }
+  }
 
   render() {
     return (
@@ -164,7 +199,13 @@ class App extends Component {
             min="1" 
             max="9" 
             value={this.state.level}
-            onChange={e => this.setState({ level: parseInt(e.target.value) })} 
+            onChange={e => {
+              if (e.target.value && parseInt(e.target.value)) {
+                this.setState({ level: parseInt(e.target.value) })
+              } else {
+                this.setState({ level: null })
+              }
+            }}
           />
         </div>
 
@@ -193,22 +234,7 @@ class App extends Component {
         </div>
 
         {this.renderChancesForNextRoll()}
-
-        <RollCalculator
-          chance={this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level, this.state.numberInPlay)}
-          level={false}
-          roughConfidence={0.50}
-          championName={this.state.champion.name}
-        />
-        {this.state.level === 9 ? 
-          "" :
-          <RollCalculator
-            chance={this.chanceOfFindingChampionInRoll(this.state.champion.cost, this.state.level + 1, this.state.numberInPlay)}
-            level={true}
-            roughConfidence={0.50}
-            championName={this.state.champion.name}
-          />
-        }
+        {this.renderMultipleRollCalculators()}
       </div>
     );
   }
