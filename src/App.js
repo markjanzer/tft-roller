@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Select from "react-select";
+import {Decimal} from "decimal.js";
 import MultipleRollCalculator from "./MultipleRollCalculator.js";
 
 class App extends Component {
@@ -86,7 +87,7 @@ class App extends Component {
       },
     }
 
-    return levels[level][cost];
+    return new Decimal(levels[level][cost]);
   }
 
   chanceOfCorrectChampion(cost) {
@@ -98,7 +99,7 @@ class App extends Component {
       5: 6,
     }
 
-    return 1.0 / numberOfChampionsOfCost[cost];
+    return new Decimal(1.0 / numberOfChampionsOfCost[cost]);
   }
 
   percentageOfChampionRemaining(cost, numberInPlay) {
@@ -110,11 +111,11 @@ class App extends Component {
       5: 10,
     }
 
-    return (copiesOfChampionsPerCost[cost] - numberInPlay) / copiesOfChampionsPerCost[cost];
+    return new Decimal(new Decimal((copiesOfChampionsPerCost[cost] - numberInPlay)).dividedBy(copiesOfChampionsPerCost[cost]));
   }
 
   chanceOfFindingChampion(cost, level, numberInPlay) {
-    const result = this.chanceOfCorrectCost(level, cost) * this.chanceOfCorrectChampion(cost) * this.percentageOfChampionRemaining(cost, numberInPlay);
+    const result = this.chanceOfCorrectCost(level, cost).times(this.chanceOfCorrectChampion(cost)).times(this.percentageOfChampionRemaining(cost, numberInPlay));
     if (result > 0) {
       return result;
     } else {
@@ -123,17 +124,23 @@ class App extends Component {
   }
 
   chanceOfFindingChampionInRoll(cost, level, numberInPlay) {
-    var chance1 = this.chanceOfFindingChampion(cost, level, numberInPlay);
-    var chance2 = (1 - chance1) * this.chanceOfFindingChampion(cost, level, numberInPlay);
-    var chance3 = (1 - chance2) * this.chanceOfFindingChampion(cost, level, numberInPlay);
-    var chance4 = (1 - chance3) * this.chanceOfFindingChampion(cost, level, numberInPlay);
-    var chance5 = (1 - chance4) * this.chanceOfFindingChampion(cost, level, numberInPlay);
+    var chance = this.chanceOfFindingChampion(cost, level, numberInPlay);
+    var chance1 = chance;
+    var chance2 = chance1.minus(1).times(-1).times(chance);
+    var chance3 = chance2.minus(1).times(-1).times(chance);
+    var chance4 = chance3.minus(1).times(-1).times(chance);
+    var chance5 = chance4.minus(1).times(-1).times(chance);
+    console.log(chance1.toNumber(), chance2.toNumber(), chance3.toNumber(), chance4.toNumber(), chance5.toNumber())
 
-    return chance1 + chance2 + chance3 + chance4 + chance5;
+    return chance1.plus(chance2).plus(chance3).plus(chance4).plus(chance5).toNumber();
+  }
+
+  levelIsValid() {
+    return this.state.level && this.state.level > 0 && this.state.level < 10;
   }
 
   renderChancesForNextRoll() {
-    if (this.state.level) {
+    if (this.levelIsValid()) {
       if (this.state.level < 9) {
         return (
           <div>
@@ -156,7 +163,7 @@ class App extends Component {
   }
 
   renderMultipleRollCalculators() {
-    if (this.state.level) {
+    if (this.levelIsValid()) {
       if (this.state.level === 9) {
         return (
           <div>
