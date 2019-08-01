@@ -127,9 +127,9 @@ class App extends Component {
     var chance = this.chanceOfFindingChampion(cost, level, numberInPlay);
     var chance1 = chance;
     var chance2 = chance1.minus(1).times(-1).times(chance);
-    var chance3 = chance2.minus(1).times(-1).times(chance);
-    var chance4 = chance3.minus(1).times(-1).times(chance);
-    var chance5 = chance4.minus(1).times(-1).times(chance);
+    var chance3 = chance2.plus(chance1).minus(1).times(-1).times(chance);
+    var chance4 = chance3.plus(chance1).plus(chance2).minus(1).times(-1).times(chance);
+    var chance5 = chance4.plus(chance1).plus(chance2).plus(chance3).minus(1).times(-1).times(chance);
     console.log(chance1.toNumber(), chance2.toNumber(), chance3.toNumber(), chance4.toNumber(), chance5.toNumber())
 
     return chance1.plus(chance2).plus(chance3).plus(chance4).plus(chance5).toNumber();

@@ -30,6 +30,7 @@ class MultipleRollCalculator extends Component {
     let rollCount = 0;
     let confidence = 0;
 
+    // Not sure if this is right, check how I'm doing chanceOfFindingChampionInRoll
     if (params.rollCount) {
       while (rollCount < params.rollCount) {
         rollCount += 1;
